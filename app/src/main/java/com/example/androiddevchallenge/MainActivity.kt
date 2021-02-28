@@ -15,14 +15,29 @@
  */
 package com.example.androiddevchallenge
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.example.androiddevchallenge.ui.theme.MyTheme
 
 class MainActivity : AppCompatActivity() {
@@ -30,7 +45,18 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MyTheme {
-                MyApp()
+                Scaffold(topBar = {
+                    TopAppBar(title = {
+                        Text(text = "Adopt a cat")
+                    })
+                }) {
+                    Surface(color = MaterialTheme.colors.background) {
+                        MainList { position -> Intent(this, DetailActivity::class.java).apply {
+                            putExtra(DetailActivity.EXTRA_KEY_PET_ID, position)
+                            startActivity(this)
+                        } }
+                    }
+                }
             }
         }
     }
@@ -38,9 +64,66 @@ class MainActivity : AppCompatActivity() {
 
 // Start building your app here!
 @Composable
-fun MyApp() {
-    Surface(color = MaterialTheme.colors.background) {
-        Text(text = "Ready... Set... GO!")
+fun MainList(itemClick: (position: Int) -> Unit) {
+    LazyColumn(
+        contentPadding = PaddingValues(8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+
+        items(35) { position ->
+            ListItem(modifier = Modifier
+                .height(80.dp)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(4.dp))
+                .background(MaterialTheme.colors.surface)
+                .clickable {
+                    itemClick(position)
+                })
+        }
+    }
+}
+
+@Composable
+fun ListItem(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(8.dp, 8.dp)
+    ) {
+
+        Surface(
+            modifier = Modifier
+                .size(50.dp)
+                .align(Alignment.CenterVertically),
+            shape = CircleShape,
+            color = MaterialTheme.colors.onSurface.copy(alpha = 0.2f)
+        ) {
+            Image(
+                modifier = Modifier.padding(4.dp),
+                painter = painterResource(id = R.drawable.ic_cat),
+                contentDescription = "avatar"
+            )
+        }
+
+        Column(
+            modifier = Modifier
+                .padding(start = 8.dp)
+                .weight(1f)
+                .align(Alignment.CenterVertically)
+        ) {
+            Text(text = "Title", fontWeight = FontWeight.Bold)
+            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+                Text(text = "Desc", style = MaterialTheme.typography.body2)
+            }
+        }
+
+        Icon(
+            modifier = Modifier
+                .size(20.dp)
+                .align(Alignment.CenterVertically),
+            imageVector = Icons.Rounded.FavoriteBorder,
+            contentDescription = "favorite"
+        )
     }
 }
 
@@ -48,7 +131,15 @@ fun MyApp() {
 @Composable
 fun LightPreview() {
     MyTheme {
-        MyApp()
+        Scaffold(topBar = {
+            TopAppBar(title = {
+                Text(text = "Adopt a cat")
+            })
+        }) {
+            Surface(color = MaterialTheme.colors.background) {
+                MainList { }
+            }
+        }
     }
 }
 
@@ -56,6 +147,14 @@ fun LightPreview() {
 @Composable
 fun DarkPreview() {
     MyTheme(darkTheme = true) {
-        MyApp()
+        Scaffold(topBar = {
+            TopAppBar(title = {
+                Text(text = "Adopt a cat")
+            })
+        }) {
+            Surface(color = MaterialTheme.colors.background) {
+                MainList { }
+            }
+        }
     }
 }
